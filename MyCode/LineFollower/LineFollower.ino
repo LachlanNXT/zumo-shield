@@ -40,7 +40,7 @@ void setup()
   buzzer.play(">g32>>c32");
 
   // Initialize the reflectance sensors module
-  reflectanceSensors.init();
+  reflectanceSensors.init(QTR_NO_EMITTER_PIN);
 
   // Wait for the user button to be pressed and released
   button.waitForButton();
