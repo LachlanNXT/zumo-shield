@@ -24,7 +24,7 @@ ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
 ZumoMotors motors;
 
  // Timing
-unsigned long loop_start_time;
+unsigned long loop_start_time = 0;
 unsigned long last_turn_time;
 unsigned long contact_made_time;
 #define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
@@ -122,7 +122,7 @@ void loop() {
     }
     else {
       if ((millis() - loop_start_time)>5000) {
-        motors.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
+        motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       }
       else {
         motors.setSpeeds(SPIN_SPEED, -SPIN_SPEED);
