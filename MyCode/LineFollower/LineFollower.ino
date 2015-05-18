@@ -33,11 +33,11 @@ const int MAX_SPEED = 400;
 void setup()
 {
   
-  motors.flipLeftMotor(true);
-  motors.flipRightMotor(true);
+  //motors.flipLeftMotor(true);
+  //motors.flipRightMotor(true);
   
   // Play a little welcome song
-  buzzer.play(">g32>>c32");
+  //buzzer.play(">g32>>c32");
 
   // Initialize the reflectance sensors module
   reflectanceSensors.init(QTR_NO_EMITTER_PIN);
@@ -69,14 +69,14 @@ void setup()
 
   // Turn off LED to indicate we are through with calibration
   digitalWrite(13, LOW);
-  buzzer.play(">g32>>c32");
+  //buzzer.play(">g32>>c32");
 
   // Wait for the user button to be pressed and released
   button.waitForButton();
 
   // Play music and wait for it to finish before we start driving.
-  buzzer.play("L16 cdegreg4");
-  while(buzzer.isPlaying());
+  //buzzer.play("L16 cdegreg4");
+  //while(buzzer.isPlaying());
 }
 
 void loop()

@@ -171,8 +171,8 @@ void setup()
   randomSeed((unsigned int) millis());
   
   // uncomment if necessary to correct motor directions
-  motors.flipLeftMotor(true);
-  motors.flipRightMotor(true);
+  //motors.flipLeftMotor(true);
+  //motors.flipRightMotor(true);
 
   pinMode(LED, HIGH);
   buzzer.playMode(PLAY_AUTOMATIC);

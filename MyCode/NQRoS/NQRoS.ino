@@ -14,7 +14,7 @@
 #define LED 13
 Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 // Reflectance Sensor Settings
-#define NUM_SENSORS 6
+#define NUM_SENSORS 62
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
 #define QTR_THRESHOLD  1500 // microseconds
@@ -22,6 +22,13 @@ ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN);
 
 // Motor Settings
 ZumoMotors motors;
+
+ // Timing
+unsigned long loop_start_time;
+unsigned long last_turn_time;
+unsigned long contact_made_time;
+#define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
+#define MIN_DELAY_BETWEEN_CONTACTS   1000  // ms = min delay between detecting new contact event
 
 // these might need to be tuned for different motor types
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
@@ -32,57 +39,43 @@ ZumoMotors motors;
 #define STOP_DURATION     100 // ms
 #define REVERSE_DURATION  200 // ms
 #define TURN_DURATION     300 // ms
+#define DIST_LIMIT        30  // cm
+#define SPIN_SPEED        300 //
 
 #define RIGHT 1
 #define LEFT -1
-
-enum ForwardSpeed { SearchSpeed, SustainedSpeed, FullSpeed };
-ForwardSpeed _forwardSpeed;  // current forward speed setting
-unsigned long full_speed_start_time;
-#define FULL_SPEED_DURATION_LIMIT     250  // ms
-
- // Timing
-unsigned long loop_start_time;
-unsigned long last_turn_time;
-unsigned long contact_made_time;
-#define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
-#define MIN_DELAY_BETWEEN_CONTACTS   1000  // ms = min delay between detecting new contact event
 
 // Sound Effects
 ZumoBuzzer buzzer;
 const char sound_effect[] PROGMEM = "O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"; // "charge" melody
  // use V0 to suppress sound effect; v15 for max volume
-   
+ 
+int lVal;
+int rVal;
+float lVoltage;
+float rVoltage;
+float lDist;
+float rDist;
+
 void setup() {
   // put your setup code here, to run once:
-  motors.flipLeftMotor(true);
-  motors.flipRightMotor(true);
+  //motors.flipLeftMotor(true);
+  //motors.flipRightMotor(true);
   
-  // Play a little welcome song
-  buzzer.play(">g32>>c32");
-  waitForButtonAndCountDown(false);
-}
+  pinMode(LED, OUTPUT);
+  digitalWrite(13, HIGH);
+  Serial.begin(9600);    
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
+  digitalWrite(A4, LOW);
+  digitalWrite(A5, LOW);
+  
+  randomSeed((unsigned int) millis());
 
-void waitForButtonAndCountDown(bool restarting)
-{ 
-#ifdef LOG_SERIAL
-  Serial.print(restarting ? "Restarting Countdown" : "Starting Countdown");
-  Serial.println();
-#endif
-  
-  digitalWrite(LED, HIGH);
+  // Play a little welcome song
+  //buzzer.play(">g32>>c32");
   button.waitForButton();
-  digitalWrite(LED, LOW);
-   
-  // play audible countdown
-  for (int i = 0; i < 3; i++)
-  {
-    delay(1000);
-    buzzer.playNote(NOTE_G(3), 50, 12);
-  }
-  delay(1000);
-  buzzer.playFromProgramSpace(sound_effect);
-  delay(1000);
+  digitalWrite(13, LOW);
 }
 
 void loop() {
@@ -95,4 +88,64 @@ void loop() {
     buzzer.play(">g32>>c32");
     button.waitForRelease();
   }
+  
+  sensors.read(sensor_values);
+
+  if (sensor_values[0] < QTR_THRESHOLD)
+  {
+    // if leftmost sensor detects line, reverse and turn to the right
+    turn(RIGHT, true);
+  }
+  else if (sensor_values[5] < QTR_THRESHOLD)
+  {
+    // if rightmost sensor detects line, reverse and turn to the left
+    turn(LEFT, true);
+  }
+  else  // otherwise, go straight
+  {
+    lVal = analogRead(4);   // reads the value of the sharp sensor
+    rVal = analogRead(5);
+    lVoltage = lVal*(5/1023.0);
+    rVoltage = rVal*(5/1023.0);
+    lDist = 27.0570*pow(lVoltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
+    rDist = 27.0570*pow(rVoltage,-1.1811);
+      
+    if (lDist<DIST_LIMIT && rDist<DIST_LIMIT){
+      motors.setSpeeds(FULL_SPEED, FULL_SPEED);
+      loop_start_time = millis();
+    }
+    else if (lDist<DIST_LIMIT && rDist>DIST_LIMIT){
+      motors.setSpeeds(SEARCH_SPEED, FULL_SPEED);
+    }
+    else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
+      motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
+    }
+    else {
+      if ((millis() - loop_start_time)>5000) {
+        motors.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
+      }
+      else {
+        motors.setSpeeds(SPIN_SPEED, -SPIN_SPEED);
+      }
+    }
+  }
+}
+
+void turn(char direction, bool randomize)
+{
+#ifdef LOG_SERIAL
+  Serial.print("turning ...");
+  Serial.println();
+#endif
+  
+  static unsigned int duration_increment = TURN_DURATION / 4;
+  
+  // motors.setSpeeds(0,0);
+  // delay(STOP_DURATION);
+  motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+  delay(REVERSE_DURATION);
+  motors.setSpeeds(TURN_SPEED * direction, -TURN_SPEED * direction);
+  delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
+  motors.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
+  last_turn_time = millis();
 }
