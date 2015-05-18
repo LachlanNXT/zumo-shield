@@ -58,7 +58,6 @@ float lDist;
 float rDist;
 
 void setup() {
-  // put your setup code here, to run once:
   //motors.flipLeftMotor(true);
   //motors.flipRightMotor(true);
   
@@ -79,10 +78,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
-  if (button.isPressed())
-  {
+  
+  if (button.isPressed()){
     // if button is pressed, stop and wait for another press to go again
     motors.setSpeeds(0, 0);
     buzzer.play(">g32>>c32");
@@ -91,18 +88,16 @@ void loop() {
   
   sensors.read(sensor_values);
 
-  if (sensor_values[0] < QTR_THRESHOLD)
-  {
+  if (sensor_values[0] < QTR_THRESHOLD)  {
     // if leftmost sensor detects line, reverse and turn to the right
-    turn(RIGHT, true);
+    revTurn(RIGHT, true);
   }
-  else if (sensor_values[5] < QTR_THRESHOLD)
-  {
+  else if (sensor_values[5] < QTR_THRESHOLD)  {
     // if rightmost sensor detects line, reverse and turn to the left
-    turn(LEFT, true);
+    revTurn(LEFT, true);
   }
-  else  // otherwise, go straight
-  {
+  else  { // otherwise, search
+    // calculate distance of opponent
     lVal = analogRead(4);   // reads the value of the sharp sensor
     rVal = analogRead(5);
     lVoltage = lVal*(5/1023.0);
@@ -111,28 +106,32 @@ void loop() {
     rDist = 27.0570*pow(rVoltage,-1.1811);
       
     if (lDist<DIST_LIMIT && rDist<DIST_LIMIT){
+      // if directly infront, go straight fast
       motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       loop_start_time = millis();
     }
     else if (lDist<DIST_LIMIT && rDist>DIST_LIMIT){
+      // if off to one side, go diagonally fast
       motors.setSpeeds(SEARCH_SPEED, FULL_SPEED);
     }
     else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
+      // if off to other side, go diagonally fast
       motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
     }
     else {
       if ((millis() - loop_start_time)>5000) {
+        // prevent travelling fast for too long
         motors.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
       }
       else {
+        // otherwise spin to search
         motors.setSpeeds(SPIN_SPEED, -SPIN_SPEED);
       }
     }
   }
 }
 
-void turn(char direction, bool randomize)
-{
+void revTurn(char direction, bool randomize){
 #ifdef LOG_SERIAL
   Serial.print("turning ...");
   Serial.println();
