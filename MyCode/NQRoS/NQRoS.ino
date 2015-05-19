@@ -14,7 +14,7 @@
 #define LED 13
 Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 // Reflectance Sensor Settings
-#define NUM_SENSORS 62
+#define NUM_SENSORS 6
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
 #define QTR_THRESHOLD  1500 // microseconds
