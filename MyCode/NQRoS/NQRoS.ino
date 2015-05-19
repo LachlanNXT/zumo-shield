@@ -7,15 +7,19 @@
 #include <Wire.h>
 #include <LSM303.h>
 
-/* NQRoS Sumo Bot code
-  Lachlan Robinson
-  */
+/*  NQRoS Sumo Bot code
+    QUT Robotics Club
+    Lachlan Robinson
+    Natasha Moffat
+    Ben Graham  
+    uses some code from SumoCollisionDetect example
+*/
 
 #define LED 13
 Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 // Reflectance Sensor Settings
 #define NUM_SENSORS 2
-byte pins[] = [4, 5];
+byte pins[] = {4, 5};
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
 #define QTR_THRESHOLD  1500 // microseconds
@@ -83,7 +87,10 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  
+  int mostRecentTurn = RIGHT;
+  int direction = LEFT;
+  
   if (button.isPressed())
   {
     // if button is pressed, stop and wait for another press to go again
@@ -98,11 +105,13 @@ void loop() {
   {
     // if leftmost sensor detects line, reverse and turn to the right
     turn(RIGHT, true);
+    mostRecentTurn = RIGHT;
   }
   else if (sensor_values[5] < QTR_THRESHOLD)
   {
     // if rightmost sensor detects line, reverse and turn to the left
     turn(LEFT, true);
+    mostRecentTurn = LEFT;
   }
   else  // otherwise, go straight
   {
@@ -128,7 +137,13 @@ void loop() {
         motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       }
       else {
-        motors.setSpeeds(SPIN_SPEED, -SPIN_SPEED);
+        if (mostRecentTurn = LEFT) {
+          direction = RIGHT;
+        }
+        else {
+          direction = LEFT;
+        }
+        motors.setSpeeds(SPIN_SPEED * direction, -SPIN_SPEED * direction);
       }
     }
   }
@@ -136,19 +151,16 @@ void loop() {
 
 void turn(char direction, bool randomize)
 {
-#ifdef LOG_SERIAL
-  Serial.print("turning ...");
-  Serial.println();
-#endif
   
   static unsigned int duration_increment = TURN_DURATION / 4;
   
   // motors.setSpeeds(0,0);
   // delay(STOP_DURATION);
-  motors.setSpeeds(-REVERSE_SPEED, -REVERSE_SPEED);
+      
+  motors.setSpeeds(-FULL_SPEED, -FULL_SPEED);
   delay(REVERSE_DURATION);
-  motors.setSpeeds(TURN_SPEED * direction, -TURN_SPEED * direction);
+  motors.setSpeeds(FULL_SPEED * direction, -FULL_SPEED * direction);
   delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
-  motors.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
+  motors.setSpeeds(FULL_SPEED, FULL_SPEED);
   last_turn_time = millis();
 }
