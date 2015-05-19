@@ -65,11 +65,11 @@ void setup() {
   
   pinMode(LED, OUTPUT);
   digitalWrite(13, HIGH);
-  Serial.begin(9600);    
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
-  digitalWrite(A4, LOW);
-  digitalWrite(A5, LOW);
+  //Serial.begin(9600);    
+  //pinMode(A4, INPUT);
+  //pinMode(A5, INPUT);
+  //digitalWrite(A4, LOW);
+  //digitalWrite(A5, LOW);
   
   randomSeed((unsigned int) millis());
 
@@ -77,6 +77,8 @@ void setup() {
   //buzzer.play(">g32>>c32");
   button.waitForButton();
   digitalWrite(13, LOW);
+  // 5 second delay before starting
+  delay(5000);
 }
 
 void loop() {
