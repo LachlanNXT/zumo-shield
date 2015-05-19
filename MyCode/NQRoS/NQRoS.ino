@@ -138,10 +138,10 @@ void loop() {
       }
       else {
         if (mostRecentTurn = LEFT) {
-          direction = RIGHT;
+          direction = LEFT;
         }
         else {
-          direction = LEFT;
+          direction = RIGHT;
         }
         motors.setSpeeds(SPIN_SPEED * direction, -SPIN_SPEED * direction);
       }
