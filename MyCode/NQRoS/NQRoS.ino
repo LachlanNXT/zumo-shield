@@ -14,11 +14,12 @@
 #define LED 13
 Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 // Reflectance Sensor Settings
-#define NUM_SENSORS 6
+#define NUM_SENSORS 2
+byte pins[] = [4, 5];
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
 #define QTR_THRESHOLD  1500 // microseconds
-ZumoReflectanceSensorArray sensors(QTR_NO_EMITTER_PIN); 
+ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN); 
 
 // Motor Settings
 ZumoMotors motors;
@@ -103,8 +104,8 @@ void loop() {
   }
   else  // otherwise, go straight
   {
-    lVal = analogRead(4);   // reads the value of the sharp sensor
-    rVal = analogRead(5);
+    lVal = analogRead(0);   // reads the value of the sharp sensor
+    rVal = analogRead(1);
     lVoltage = lVal*(5/1023.0);
     rVoltage = rVal*(5/1023.0);
     lDist = 27.0570*pow(lVoltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
