@@ -29,13 +29,14 @@ ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN);
 ZumoMotors motors;
 
  // Timing
-unsigned long loop_start_time = 0;
+unsigned long loop_start_time = millis();
 unsigned long last_turn_time;
 unsigned long contact_made_time;
 #define MIN_DELAY_AFTER_TURN          400  // ms = min delay before detecting contact event
 #define MIN_DELAY_BETWEEN_CONTACTS   1000  // ms = min delay between detecting new contact event
 
 // these might need to be tuned for different motor types
+#define CHASE_SPEED       100
 #define REVERSE_SPEED     200 // 0 is stopped, 400 is full speed
 #define TURN_SPEED        200
 #define SEARCH_SPEED      200
@@ -83,12 +84,15 @@ void setup() {
   digitalWrite(13, LOW);
   // 5 second delay before starting
   delay(5000);
+  loop_start_time = millis();
 }
+
+int mostRecentTurn;
 
 void loop() {
   // put your main code here, to run repeatedly:
   
-  int mostRecentTurn = RIGHT;
+  
   int direction = LEFT;
   
   if (button.isPressed())
@@ -118,7 +122,7 @@ void loop() {
   else
   {
     lVal = analogRead(0);   // reads the value of the sharp sensor
-    rVal = analogRead(1);
+    rVal = analogRead(2);
     lVoltage = lVal*(5/1023.0);
     rVoltage = rVal*(5/1023.0);
     lDist = 27.0570*pow(lVoltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
@@ -129,17 +133,19 @@ void loop() {
       loop_start_time = millis();
     }
     else if (lDist<DIST_LIMIT && rDist>DIST_LIMIT){
-      motors.setSpeeds(SEARCH_SPEED, FULL_SPEED);
+      motors.setSpeeds(CHASE_SPEED, FULL_SPEED);
+      mostRecentTurn = LEFT;
     }
     else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
-      motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
+      motors.setSpeeds(FULL_SPEED, CHASE_SPEED);
+      mostRecentTurn = RIGHT;
     }
     else {
       if ((millis() - loop_start_time)>5000) {
         motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       }
       else {
-        if (mostRecentTurn = LEFT) {
+        if (mostRecentTurn == LEFT) {
           direction = LEFT;
         }
         else {
