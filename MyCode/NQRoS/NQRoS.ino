@@ -103,14 +103,14 @@ void loop() {
 
   if (sensor_values[0] < QTR_THRESHOLD)
   {
-    // if leftmost sensor detects line, reverse and turn to the right
-    turn(RIGHT, true);
+    // note - if leftmost sensor detects line, reverse and turn to the right
+    turn(RIGHT, false);
     mostRecentTurn = RIGHT;
   }
-  else if (sensor_values[5] < QTR_THRESHOLD)
+  else if (sensor_values[1] < QTR_THRESHOLD)
   {
-    // if rightmost sensor detects line, reverse and turn to the left
-    turn(LEFT, true);
+    // note - if rightmost sensor detects line, reverse and turn to the left
+    turn(LEFT, false);
     mostRecentTurn = LEFT;
   }
   else  // otherwise, go straight
@@ -164,3 +164,4 @@ void turn(char direction, bool randomize)
   motors.setSpeeds(FULL_SPEED, FULL_SPEED);
   last_turn_time = millis();
 }
+
