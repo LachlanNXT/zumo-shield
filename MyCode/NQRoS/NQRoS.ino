@@ -101,6 +101,7 @@ void loop() {
   
   sensors.read(sensor_values);
 
+  // Does robot detect line?
   if (sensor_values[0] < QTR_THRESHOLD)
   {
     // note - if leftmost sensor detects line, reverse and turn to the right
@@ -113,7 +114,8 @@ void loop() {
     turn(LEFT, false);
     mostRecentTurn = LEFT;
   }
-  else  // otherwise, go straight
+  // If robot does not detect line, do normal behaviour - seek and destroy!
+  else
   {
     lVal = analogRead(0);   // reads the value of the sharp sensor
     rVal = analogRead(1);
@@ -161,7 +163,7 @@ void turn(char direction, bool randomize)
   delay(REVERSE_DURATION);
   motors.setSpeeds(FULL_SPEED * direction, -FULL_SPEED * direction);
   delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
-  motors.setSpeeds(FULL_SPEED, FULL_SPEED);
+  motors.setSpeeds(0,0);
   last_turn_time = millis();
 }
 
