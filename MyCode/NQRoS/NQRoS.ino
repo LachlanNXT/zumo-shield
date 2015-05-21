@@ -132,7 +132,8 @@ void loop() {
       motors.setSpeeds(SEARCH_SPEED, FULL_SPEED);
     }
     else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
-      motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
+      //motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
+      motors.setSpeeds(0, 0);
     }
     else {
       if ((millis() - loop_start_time)>5000) {
