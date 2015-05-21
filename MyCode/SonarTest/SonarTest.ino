@@ -14,7 +14,7 @@ ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 #define LED 13
 
-int sensorpin = 4;
+int sensorpin = 0;
 int i;// analog pin used to connect the sharp sensor
 int val = 0;                 // variable to store the values from sensor(initially zero)
 float distance = 0; 

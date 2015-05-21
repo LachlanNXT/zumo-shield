@@ -91,8 +91,7 @@ void loop() {
   int mostRecentTurn = RIGHT;
   int direction = LEFT;
   
-  if (button.isPressed())
-  {
+  if (button.isPressed()){
     // if button is pressed, stop and wait for another press to go again
     motors.setSpeeds(0, 0);
     buzzer.play(">g32>>c32");
@@ -102,21 +101,18 @@ void loop() {
   sensors.read(sensor_values);
 
   // Does robot detect line?
-  if (sensor_values[0] < QTR_THRESHOLD)
-  {
+  if (sensor_values[0] < QTR_THRESHOLD){
     // note - if leftmost sensor detects line, reverse and turn to the right
     turn(RIGHT, false);
     mostRecentTurn = RIGHT;
   }
-  else if (sensor_values[1] < QTR_THRESHOLD)
-  {
+  else if (sensor_values[1] < QTR_THRESHOLD){
     // note - if rightmost sensor detects line, reverse and turn to the left
     turn(LEFT, false);
     mostRecentTurn = LEFT;
   }
   // If robot does not detect line, do normal behaviour - seek and destroy!
-  else
-  {
+  else{
     lVal = analogRead(0);   // reads the value of the sharp sensor
     rVal = analogRead(1);
     lVoltage = lVal*(5/1023.0);
@@ -132,8 +128,7 @@ void loop() {
       motors.setSpeeds(SEARCH_SPEED, FULL_SPEED);
     }
     else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
-      //motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
-      motors.setSpeeds(0, 0);
+      motors.setSpeeds(FULL_SPEED, SEARCH_SPEED);
     }
     else {
       if ((millis() - loop_start_time)>5000) {
