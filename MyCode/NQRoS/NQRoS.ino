@@ -8,6 +8,7 @@
 #include <LSM303.h>
 
 #define FLIPPED 0
+#define SONAR 1
 
 /*  NQRoS Sumo Bot code
     QUT Robotics Club
@@ -67,16 +68,19 @@ int lDist;
 int rDist;
 int lSpeed;
 int rSpeed;
-int offset = (analogRead(0)+analogRead(2))/2;
+int offset = (analogRead(0) + analogRead(2)) / 2;
 int baseline = 83;
 int mostRecentTurn;
 bool reversing;
+int val = 0;                 // variable to store the values from sensor(initially zero)
+float distance = 0;
+float voltage = 0;
 
 void setup() {
   // put your setup code here, to run once:
   if (FLIPPED) {
-  motors.flipLeftMotor(true);
-  motors.flipRightMotor(true);
+    motors.flipLeftMotor(true);
+    motors.flipRightMotor(true);
   }
 
   pinMode(LED, OUTPUT);
@@ -121,6 +125,7 @@ void loop() {
     reverse(FULL_SPEED);
     mostRecentTurn = RIGHT;
     last_line_time = millis();
+    loop_start_time = millis();
     reversing = true;
   }
   // Does robot detect line on right sensor? If so, back up and turn left
@@ -130,10 +135,11 @@ void loop() {
     reverse(FULL_SPEED);
     mostRecentTurn = LEFT;
     last_line_time = millis();
+    loop_start_time = millis();
     reversing = true;
   }
   // Start spinning if backed up enough.
-  else if (last_line_time > 300 && reversing == true) {
+  else if (((millis() - last_line_time) > 800) && (reversing == true)) {
     reversing = false;
     spin(mostRecentTurn);
     loop_start_time = millis();
@@ -141,64 +147,76 @@ void loop() {
   // Cases for when the other robot is detected
   else {
     // Read sensors and convert to useful values
-    lVal = (analogRead(0) - offset + baseline);
-    rVal = (analogRead(2) - offset + baseline);
+    lVal = (analogRead(0) - offset);
+    rVal = (analogRead(2) - offset);
     lVal < 0 ? lVal = baseline :
-    rVal < 0 ? rVal = baseline :
-    lVoltage = lVal * (5 / 1023.0);
+                      rVal < 0 ? rVal = baseline :
+                                        lVoltage = lVal * (5 / 1023.0);
     rVoltage = rVal * (5 / 1023.0);
     lDist = 27.0570 * pow(lVoltage, -1.1811); //pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
     rDist = 27.0570 * pow(rVoltage, -1.1811);
-    
-    // if both forward sensors detect, charge ahead
-    if (lDist < DIST_LIMIT && rDist < DIST_LIMIT) {
-      motors.setSpeeds(FULL_SPEED, FULL_SPEED);
-      loop_start_time = millis();
-    }
-    // if left sensor only detects, turn left
-    else if (lDist < DIST_LIMIT && rDist > DIST_LIMIT) {
-      motors.setSpeeds(CHASE_SPEED, FULL_SPEED);
-      mostRecentTurn = LEFT;
-    }
-    // if right sensor only detects, turn right
-    else if (lDist > DIST_LIMIT && rDist < DIST_LIMIT) {
-      motors.setSpeeds(FULL_SPEED, CHASE_SPEED);
-      mostRecentTurn = RIGHT;
-    }
-    // if no line and no detection
-    else {
-      // if has been spinning for 5 seconds, go find the other robot
-      if ((millis() - loop_start_time) > 5000) {
-        motors.setSpeeds(FULL_SPEED, FULL_SPEED);
+
+    if (SONAR) {
+      val = analogRead(3);   // reads the value of the ultrasonic sensor
+      voltage = val * (5000 / 1023.0); // convert to mV
+      distance = voltage / 3.86; //distance conversion
+      if (distance < 20) {
+        buzzer.play(">g32>>c32");
+        motors.setSpeeds(mostRecentTurn*FULL_SPEED, -FULL_SPEED*mostRecentTurn);
+        delay(400);
+        loop_start_time = 9999;
       }
-      // if spinning for less than 5 seconds, search by spinning and scanning
-      else {
-         spin(mostRecentTurn);
-      }
+    }
+
+      // if both forward sensors detect, charge ahead
+      if (lDist < DIST_LIMIT && rDist < DIST_LIMIT) {
+          motors.setSpeeds(FULL_SPEED, FULL_SPEED);
+          loop_start_time = millis();
+        }
+      // if left sensor only detects, turn left
+        else if (lDist < DIST_LIMIT && rDist > DIST_LIMIT) {
+          motors.setSpeeds(CHASE_SPEED, FULL_SPEED);
+          mostRecentTurn = LEFT;
+        }
+      // if right sensor only detects, turn right
+        else if (lDist > DIST_LIMIT && rDist < DIST_LIMIT) {
+          motors.setSpeeds(FULL_SPEED, CHASE_SPEED);
+          mostRecentTurn = RIGHT;
+        }
+      // if no line and no detection
+        else {
+          // if has been spinning for 5 seconds, go find the other robot
+          if ((millis() - loop_start_time) > 5000) {
+            motors.setSpeeds(FULL_SPEED, FULL_SPEED);
+          }
+          // if spinning for less than 5 seconds, search by spinning and scanning
+          else {
+            spin(mostRecentTurn);
+          }
+        }
     }
   }
-}
 
-void spin(char direction) {
-  motors.setSpeeds(SPIN_SPEED * direction, -SPIN_SPEED * direction);
-}
+  void spin(char direction) {
+    motors.setSpeeds(SPIN_SPEED * direction, -SPIN_SPEED * direction);
+  }
 
-void reverse(int speed) {
-  motors.setSpeeds(-speed,speed);
-}
+  void reverse(int speed) {
+    motors.setSpeeds(-speed, -speed);
+  }
 
-void turn(char direction, bool randomize)
-{
+  void turn(char direction, bool randomize)
+  {
 
-  static unsigned int duration_increment = TURN_DURATION / 4;
+    static unsigned int duration_increment = TURN_DURATION / 4;
 
-  // motors.setSpeeds(0,0);
-  // delay(STOP_DURATION);
+    // motors.setSpeeds(0,0);
+    // delay(STOP_DURATION);
 
-  motors.setSpeeds(-FULL_SPEED, -FULL_SPEED);
-  delay(REVERSE_DURATION);
-  motors.setSpeeds(FULL_SPEED * direction, -FULL_SPEED * direction);
-  delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
-  motors.setSpeeds(0, 0);
-  last_turn_time = millis();
-}
+    motors.setSpeeds(-FULL_SPEED, -FULL_SPEED);
+    delay(REVERSE_DURATION);
+    motors.setSpeeds(FULL_SPEED * direction, -FULL_SPEED * direction);
+    delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
+    motors.setSpeeds(0, 0);
+    last_turn_time = millis();
+  }

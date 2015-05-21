@@ -8,6 +8,7 @@
 #include <LSM303.h>
 #include <QTRSensors.h>
 
+/*
 ZumoBuzzer buzzer;
 #define NUM_SENSORS 2
 byte pins[] = {4, 5};
@@ -18,8 +19,9 @@ ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN);
 ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 #define LED 13
+*/
 
-int sensorpin = 5;
+int sensorpin = 3;
 int i;// analog pin used to connect the sharp sensor
 int val = 0;                 // variable to store the values from sensor(initially zero)
 float distance = 0; 
@@ -30,8 +32,8 @@ void setup()
   pinMode(13, OUTPUT);
   digitalWrite(13, HIGH);
   Serial.begin(9600);               // starts the serial monitor
-  motors.flipLeftMotor(true);
-  motors.flipRightMotor(true);
+  //motors.flipLeftMotor(true);
+  //motors.flipRightMotor(true);
   
   //buzzer.play(">g32>>c32");
   /*
@@ -48,11 +50,13 @@ void setup()
   digitalWrite(A4, LOW);
   digitalWrite(A5, LOW);
   */
-  button.waitForButton();
-  digitalWrite(13, LOW);
+  //button.waitForButton();
+  //digitalWrite(13, LOW);
 
 }
- 
+
+//3.86mV/cm
+
 void loop()
 {
     
@@ -60,8 +64,9 @@ void loop()
   {
     //sensorpin = i;
     val = analogRead(sensorpin);   // reads the value of the sharp sensor
-    voltage = val*(5/1023.0);
-    distance = 27.0570*pow(voltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
+    voltage = val*(5000/1023.0);
+    //distance = 27.0570*pow(voltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
+    distance = voltage/3.86;
     Serial.print("Sensor ");
     Serial.print(sensorpin);
     Serial.print(" analog ");
@@ -73,3 +78,4 @@ void loop()
     delay(1);                    // wait for this much time before printing next value
   }
 }
+
