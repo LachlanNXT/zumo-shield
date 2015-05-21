@@ -11,7 +11,7 @@
     QUT Robotics Club
     Lachlan Robinson
     Natasha Moffat
-    Ben Graham  
+    Ben Graham
     uses some code from SumoCollisionDetect example
 */
 
@@ -23,12 +23,12 @@ byte pins[] = {4, 5};
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
 #define QTR_THRESHOLD  1500 // microseconds
-ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN); 
+ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN);
 
 // Motor Settings
 ZumoMotors motors;
 
- // Timing
+// Timing
 unsigned long loop_start_time = millis();
 unsigned long last_turn_time;
 unsigned long contact_made_time;
@@ -54,8 +54,8 @@ unsigned long contact_made_time;
 // Sound Effects
 ZumoBuzzer buzzer;
 const char sound_effect[] PROGMEM = "O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"; // "charge" melody
- // use V0 to suppress sound effect; v15 for max volume
- 
+// use V0 to suppress sound effect; v15 for max volume
+
 int lVal;
 int rVal;
 float lVoltage;
@@ -67,15 +67,15 @@ void setup() {
   // put your setup code here, to run once:
   //motors.flipLeftMotor(true);
   //motors.flipRightMotor(true);
-  
+
   pinMode(LED, OUTPUT);
   digitalWrite(13, HIGH);
-  //Serial.begin(9600);    
+  //Serial.begin(9600);
   //pinMode(A4, INPUT);
   //pinMode(A5, INPUT);
   //digitalWrite(A4, LOW);
   //digitalWrite(A5, LOW);
-  
+
   randomSeed((unsigned int) millis());
 
   // Play a little welcome song
@@ -91,10 +91,10 @@ int mostRecentTurn;
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
-  
+
+
   int direction = LEFT;
-  
+
   if (button.isPressed())
   {
     // if button is pressed, stop and wait for another press to go again
@@ -102,7 +102,7 @@ void loop() {
     buzzer.play(">g32>>c32");
     button.waitForRelease();
   }
-  
+
   sensors.read(sensor_values);
 
   // Does robot detect line?
@@ -123,25 +123,25 @@ void loop() {
   {
     lVal = analogRead(0);   // reads the value of the sharp sensor
     rVal = analogRead(2);
-    lVoltage = lVal*(5/1023.0);
-    rVoltage = rVal*(5/1023.0);
-    lDist = 27.0570*pow(lVoltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
-    rDist = 27.0570*pow(rVoltage,-1.1811);
-      
-    if (lDist<DIST_LIMIT && rDist<DIST_LIMIT){
+    lVoltage = lVal * (5 / 1023.0);
+    rVoltage = rVal * (5 / 1023.0);
+    lDist = 27.0570 * pow(lVoltage, -1.1811); //pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
+    rDist = 27.0570 * pow(rVoltage, -1.1811);
+
+    if (lDist < DIST_LIMIT && rDist < DIST_LIMIT) {
       motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       loop_start_time = millis();
     }
-    else if (lDist<DIST_LIMIT && rDist>DIST_LIMIT){
+    else if (lDist < DIST_LIMIT && rDist > DIST_LIMIT) {
       motors.setSpeeds(CHASE_SPEED, FULL_SPEED);
       mostRecentTurn = LEFT;
     }
-    else if (lDist>DIST_LIMIT && rDist<DIST_LIMIT){
+    else if (lDist > DIST_LIMIT && rDist < DIST_LIMIT) {
       motors.setSpeeds(FULL_SPEED, CHASE_SPEED);
       mostRecentTurn = RIGHT;
     }
     else {
-      if ((millis() - loop_start_time)>5000) {
+      if ((millis() - loop_start_time) > 5000) {
         motors.setSpeeds(FULL_SPEED, FULL_SPEED);
       }
       else {
@@ -159,17 +159,17 @@ void loop() {
 
 void turn(char direction, bool randomize)
 {
-  
+
   static unsigned int duration_increment = TURN_DURATION / 4;
-  
+
   // motors.setSpeeds(0,0);
   // delay(STOP_DURATION);
-      
+
   motors.setSpeeds(-FULL_SPEED, -FULL_SPEED);
   delay(REVERSE_DURATION);
   motors.setSpeeds(FULL_SPEED * direction, -FULL_SPEED * direction);
   delay(randomize ? TURN_DURATION + (random(8) - 2) * duration_increment : TURN_DURATION);
-  motors.setSpeeds(0,0);
+  motors.setSpeeds(0, 0);
   last_turn_time = millis();
 }
 
