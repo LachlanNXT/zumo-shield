@@ -9,12 +9,17 @@
 #include <QTRSensors.h>
 
 ZumoBuzzer buzzer;
-ZumoReflectanceSensorArray reflectanceSensors;
+#define NUM_SENSORS 2
+byte pins[] = {4, 5};
+unsigned int sensor_values[NUM_SENSORS];
+// this might need to be tuned for different lighting conditions, surfaces, etc.
+#define QTR_THRESHOLD  1500 // microseconds
+ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN);
 ZumoMotors motors;
 Pushbutton button(ZUMO_BUTTON);
 #define LED 13
 
-int sensorpin = 0;
+int sensorpin = 5;
 int i;// analog pin used to connect the sharp sensor
 int val = 0;                 // variable to store the values from sensor(initially zero)
 float distance = 0; 
@@ -29,6 +34,7 @@ void setup()
   motors.flipRightMotor(true);
   
   //buzzer.play(">g32>>c32");
+  /*
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
@@ -41,7 +47,7 @@ void setup()
   digitalWrite(A3, LOW);
   digitalWrite(A4, LOW);
   digitalWrite(A5, LOW);
-  reflectanceSensors.init(QTR_NO_EMITTER_PIN);
+  */
   button.waitForButton();
   digitalWrite(13, LOW);
 
@@ -49,7 +55,7 @@ void setup()
  
 void loop()
 {
-  
+    
   for (int i = 0; i<6; i++)
   {
     //sensorpin = i;
