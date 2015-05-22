@@ -21,7 +21,7 @@ Pushbutton button(ZUMO_BUTTON);
 #define LED 13
 */
 
-int sensorpin = 3;
+int sensorpin = 2;
 int i;// analog pin used to connect the sharp sensor
 int val = 0;                 // variable to store the values from sensor(initially zero)
 float distance = 0; 
@@ -64,9 +64,9 @@ void loop()
   {
     //sensorpin = i;
     val = analogRead(sensorpin);   // reads the value of the sharp sensor
-    voltage = val*(5000/1023.0);
-    //distance = 27.0570*pow(voltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
-    distance = voltage/3.86;
+    voltage = val*(5/1023.0);
+    distance = 27.0570*pow(voltage,-1.1811);//pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
+    //distance = voltage/3.86;
     Serial.print("Sensor ");
     Serial.print(sensorpin);
     Serial.print(" analog ");
