@@ -8,7 +8,7 @@
 #include <LSM303.h>
 
 #define FLIPPED 0
-#define SONAR 1
+#define SONAR 0
 
 /*  NQRoS Sumo Bot code
     QUT Robotics Club
@@ -94,7 +94,7 @@ void setup() {
   // Play a little welcome song
   //buzzer.play(">g32>>c32");
   button.waitForButton();
-  randomSeed((unsigned int) millis());
+  //randomSeed((unsigned int) millis());
   digitalWrite(13, LOW);
   // 5 second delay before starting
   delay(5000);
@@ -150,8 +150,8 @@ void loop() {
     lVal = (analogRead(0) - offset);
     rVal = (analogRead(2) - offset);
     lVal < 0 ? lVal = baseline :
-                      rVal < 0 ? rVal = baseline :
-                                        lVoltage = lVal * (5 / 1023.0);
+    rVal < 0 ? rVal = baseline :
+    lVoltage = lVal * (5 / 1023.0);
     rVoltage = rVal * (5 / 1023.0);
     lDist = 27.0570 * pow(lVoltage, -1.1811); //pow(((val*(5/1023.0)*0.001221)/16.251),1.1765);
     rDist = 27.0570 * pow(rVoltage, -1.1811);
