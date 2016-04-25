@@ -25,7 +25,7 @@ Pushbutton button(ZUMO_BUTTON); // pushbutton on pin 12
 byte pins[] = {4, 5};
 unsigned int sensor_values[NUM_SENSORS];
 // this might need to be tuned for different lighting conditions, surfaces, etc.
-#define QTR_THRESHOLD  1500 // microseconds
+#define QTR_THRESHOLD  1000 // microseconds
 ZumoReflectanceSensorArray sensors(pins, 2, 2000, QTR_NO_EMITTER_PIN);
 
 // Motor Settings
